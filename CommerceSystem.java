@@ -1,6 +1,5 @@
 package commerce;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -12,14 +11,14 @@ public class CommerceSystem {
     }
 
     // 카테고리에 일치하는 상품 등록요청
-    public void addProduct( Category category , Product[] products) {
+    private void addProduct( Category category , Product[] products) {
         for (Product product : products) {
             category.addProduct(product);
         }
     }
 
     // 카테고리 이름을 입력받고 새로운 카테고리 생성 및 리스트에 추가
-    public Category addCategory(String categoryName) {
+    private Category addCategory(String categoryName) {
         Category category = new Category(categoryName);
         categories.add(category);
         return category;
@@ -94,15 +93,14 @@ public class CommerceSystem {
 
             Product product = products.get(Integer.parseInt(choice) -1);
 
-            System.out.println("선택한 상품: " + product + " | " + "재고: " + product.productStock + "개");
+            System.out.println("선택한 상품: " + product + " | " + "재고: " + product.getProductStock() + "개");
 
         }
 
 
     }
     // 코드가 너무 길어지고 추후 기능 추가를 위해 카테고리와 상품 추가 분리
-    public void commerceContext() {
-
+    private void commerceContext() {
         Category electronic =  addCategory("전자제품");
         Product galaxyS25 = new Product("Galaxy S25", 1_200_000, "최신 안드로이드 스마트폰", 5);
         Product iphone16 = new Product("iPhone 16", 1_350_000, "Apple의 최신 스마트폰", 1);
