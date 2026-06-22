@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        List<Product> productList = new ArrayList<>();
+        List<Category> productList = new ArrayList<>();
         CommerceSystem commerceSystem = new CommerceSystem(productList);
         commerceSystem.startProgram();
 
