@@ -27,15 +27,75 @@ public class CommerceSystem {
 
     public void startProgram() {
         commerceContext();
-        System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
         Scanner sc = new Scanner(System.in);
 
         while (true) {
+            System.out.flush();
+            System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
             String choice;
             for (int i = 0; i < categories.size(); i++) {
                 System.out.println( (i + 1)  + "." + categories.get(i) );
             }
-            break;
+            System.out.println("0. 종료      | 프로그램 종료");
+
+            choice = sc.nextLine();
+            // 0 입력 시 종로
+            if (choice.equals("0")) {
+                break;
+            }
+            // 입력 값이 정수가 아닌경우
+            try {
+                Integer.parseInt(choice);
+            } catch (RuntimeException r) {
+                System.out.println("잘못된 값 입력");
+                continue;
+            }
+
+            // 없는 인덱스 범위라면
+            try {
+                 categories.get(Integer.parseInt(choice) -1);
+            } catch (IndexOutOfBoundsException index) {
+                System.out.println("없는 카테고리 입니다.");
+                continue;
+            }
+
+//            // 입력한 인덱스의 카테고리 객체를 추출
+            Category selectedCategory = categories.get(Integer.parseInt(choice) -1);
+
+            // 입력받은 인덱스의 카테고리 이름과 해당 카테고리가 가지고 있는 상품들 추출
+            System.out.println(selectedCategory.getCategory() + "카테고리");
+            List<Product> products = selectedCategory.getProductList();
+
+            for (int i = 0; i < products.size(); i++) {
+                System.out.println( (i+1) + ". " + products.get(i));
+            }
+
+            System.out.println("0. 뒤로가기");
+            choice = sc.nextLine();
+
+            if (choice.equals("0")) {
+                continue;
+            }
+
+            // 입력 값이 정수가 아닌경우
+            try {
+                Integer.parseInt(choice);
+            } catch (RuntimeException r) {
+                System.out.println("잘못된 값 입력");
+                continue;
+            }
+
+            try {
+                products.get(Integer.parseInt(choice) -1 );
+            } catch (IndexOutOfBoundsException u) {
+                System.out.println("없는 상품입니다.");
+                continue;
+            }
+
+            Product product = products.get(Integer.parseInt(choice) -1);
+
+            System.out.println("선택한 상품: " + product + " | " + "재고: " + product.productStock + "개");
+
         }
 
 
@@ -57,7 +117,7 @@ public class CommerceSystem {
         addProduct(cloth, clothes);
 
         Category food = addCategory("식품");
-        Product mandu = new Product("비비고 만", 8_000, "비비고 군만두", 30);
+        Product mandu = new Product("비비고 만두", 8_000, "비비고 군만두", 30);
         Product chicken = new Product("용가리 치킨", 5_500, "하림 용가리 치킨", 10);
         Product[] foods = {mandu, chicken};
         addProduct(food, foods);
