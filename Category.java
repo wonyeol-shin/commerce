@@ -28,4 +28,15 @@ public class Category {
     public List<Product> getProductList() {
         return new ArrayList<>(productList);
     }
+
+    public Product getProduct(String name) {
+
+        for (Product product : productList) {
+            if (name.equals(product.getProductName())) {
+                return product;
+            }
+        }
+
+        return null;
+    }
 }

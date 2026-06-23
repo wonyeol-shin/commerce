@@ -4,7 +4,7 @@ public class Product {
    private final String productName;
    private final Integer productPrice;
    private final String productComment;
-   private final Integer productStock;
+   private Integer productStock;
 
     public Product(String productName, Integer productPrice, String productComment, Integer productStock) {
         this.productName = productName;
@@ -13,12 +13,50 @@ public class Product {
         this.productStock = productStock;
     }
 
+    public boolean addStock() {
+        this.productStock++;
+        return true;
+    }
+
+    public boolean reduceStock() {
+        if (this.productStock == 0) {
+            System.out.println("재고 부족");
+            return false;
+        }
+        this.productStock--;
+        return true;
+    }
+
+    public boolean reduceStock(Integer stock) {
+        if (this.productStock < stock) {
+            System.out.println("재고 부족");
+            return false;
+        }
+        this.productStock-=stock;
+        return true;
+    }
+
     public Integer getProductStock() {
         return productStock;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public Integer getProductPrice() {
+        return productPrice;
+    }
+
+    public String getProductComment() {
+        return productComment;
     }
 
     @Override
     public String toString() {
         return productName + " | " + productPrice + "원" + " | " + productComment;
     }
+
+
+
 }

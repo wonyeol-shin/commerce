@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 public class CommerceSystem {
     private final List<Category> categories;
+    private Cart cart;
 
     public CommerceSystem(List<Category> categories) {
         this.categories = categories;
@@ -38,6 +39,16 @@ public class CommerceSystem {
                 System.out.println( (i + 1)  + "." + categories.get(i) );
             }
             System.out.println("0. 종료      | 프로그램 종료");
+
+            // 고객 장바구니가 비어있지 않을 경우
+            if (!isCartNull(cart)) {
+                System.out.println();
+                System.out.println("[ 주문 관리 ]");
+                System.out.println(categories.size()+1 + ". 장바구니 확인    | 장바구니를 확인 후 주문합니다.");
+                System.out.println( (categories.size()+2) + ". 주문 취소       | 진행중인 주문을 취소합니다."  );
+
+            }
+
             choice = sc.nextLine();
 
             if (isNotNum(choice)) {
@@ -50,6 +61,51 @@ public class CommerceSystem {
             }
 
             indexNum = Integer.parseInt(choice) -1;
+
+            // 장바구니 관리일 경우
+            if ((indexNum ) == categories.size() && !isCartNull(cart) ) {
+                System.out.println("아래와 같이 주문 하시겠습니까?");
+                System.out.println();
+                System.out.println("[ 장바구니 내역 ]");
+                List<Product> cartProducts = cart.getProductInCart();
+                for (Product cartProduct : cartProducts) {
+                    System.out.println(cartProduct + " | " + "수량: " + cartProduct.getProductStock() + "개");
+                }
+                System.out.println();
+                System.out.println("[ 총 주문 금액 ]");
+                System.out.println(cart.totalPrice() + "원");
+                System.out.println();
+                System.out.println("1. 주문 확정      2. 메인으로 돌아가기");
+                choice = sc.nextLine();
+                if (isNotNum(choice)) {
+                    continue;
+                }
+                // 주문 확정
+
+                // 1. 전체 장바구니를 순회한다.
+                // 2. 장바구니의 있는 상품의 이름을 가져온다.
+                // 3. 상품이름으로 카데고리의 상품을 가져온다.
+                // 4. 장바구니의 상품 재고와 카데고리 상품 재고 크기를 비교한다.
+                // 5. 하나다로 재고가 부족할 경우 주문 취소를 한다.
+                // 6. 재고가 부족하지 않을 경우 카케고리 재고를 깎는다.
+                if (choice.equals("1")) {
+                    if (isLessThanCart(cartProducts)) {
+                        continue;
+                    }
+
+                    startOrder(cartProducts);
+                    System.out.println("주문이 완료되었습니다! 총 금액 : " +  cart.totalPrice());
+                    cart = null;
+                    continue;
+                }
+                //주문 취소
+            } else if ((indexNum) == (categories.size() + 1) && !isCartNull(cart) ) {
+                cart = null;
+                System.out.println("주문 취소 완료");
+                continue;
+            }
+
+
             // 없는 인덱스 범위라면
             if (isNotIndexBound(indexNum, categories)) {
                 continue;
@@ -59,11 +115,11 @@ public class CommerceSystem {
             Category selectedCategory = categories.get(indexNum);
 
             // 입력받은 인덱스의 카테고리 이름과 해당 카테고리가 가지고 있는 상품들 추출
-            System.out.println(selectedCategory.getCategory() + "카테고리");
-            List<Product> products = selectedCategory.getProductList();
+            System.out.println(selectedCategory.getCategory() + " 카테고리");
+            List<Product> categoryProducts = selectedCategory.getProductList();
 
-            for (int i = 0; i < products.size(); i++) {
-                System.out.println( (i+1) + ". " + products.get(i));
+            for (int i = 0; i < categoryProducts.size(); i++) {
+                System.out.println( (i+1) + ". " + categoryProducts.get(i));
             }
 
             System.out.println("0. 뒤로가기");
@@ -79,14 +135,82 @@ public class CommerceSystem {
 
             indexNum = Integer.parseInt(choice) -1;
             // 없는 상품 인덱스라면
-            if (isNotProductIndexBound(indexNum, products)) {
+            if (isNotProductIndexBound(indexNum, categoryProducts)) {
                 continue;
             }
 
-            Product product = products.get(indexNum);
-            System.out.println("선택한 상품: " + product + " | " + "재고: " + product.getProductStock() + "개");
+            Product categoryProduct = categoryProducts.get(indexNum);
+            System.out.println("선택한 상품: " + categoryProduct + " | " + "재고: " + categoryProduct.getProductStock() + "개");
+            System.out.println("위 상품을 장바구니에 추가하시겠습니까?");
+            System.out.println("1. 확인        2. 취소");
+            choice = sc.nextLine();
+
+            if (isNotNum(choice)) {
+                continue;
+            }
+
+            if (choice.equals("1")) {
+                // 고객의 장바구니가 없을 경우 추가
+                if (isCartNull(cart)) {
+                    cart = new Cart();
+                }
+                cart.addCart(categoryProduct);
+                cart.printCart();
+            }
+
+
 
         }
+    }
+
+    private void startOrder(List<Product> cartProducts) {
+        for (Product cartProduct : cartProducts) {
+            String name = cartProduct.getProductName();
+            Integer quantity = cartProduct.getProductStock();
+
+            for (Category category : categories) {
+                Product product = category.getProduct(name);
+                if (product != null) {
+                    Integer previousQuantity = product.getProductStock();
+                    product.reduceStock(quantity);
+                    Integer currentQuantity = product.getProductStock();
+
+                    System.out.println(name + "재고가 " + previousQuantity + "개 -> " + currentQuantity +"개로 업데이트 되었습니다.");
+                }
+            }
+
+        }
+
+    }
+
+
+    // 주문 시 카트에 있는 상품의 수량이 실제 재고보다 많이 담겼는지 검증
+    private boolean isLessThanCart(List<Product> cartProducts) {
+        for (Product cartProduct : cartProducts) {
+            String name = cartProduct.getProductName();
+            Integer quantity = cartProduct.getProductStock();
+
+            for (Category category : categories) {
+                Product product = category.getProduct(name);
+                if (product != null) {
+                    if (quantity > product.getProductStock()) {
+                        System.out.println("재고 부족");
+                        return true;
+                    }
+                }
+
+            }
+
+        }
+
+        return false;
+    }
+
+    private boolean isCartNull(Cart cart) {
+        if (cart == null) {
+            return true;
+        }
+        return false;
     }
 
     private boolean isNotProductIndexBound(Integer choice, List<Product> products) {
@@ -108,7 +232,6 @@ public class CommerceSystem {
         }
         return false;
     }
-
 
     private boolean isNotNum(String choice) {
         try {
