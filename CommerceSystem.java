@@ -8,7 +8,7 @@ public class CommerceSystem {
     private Cart cart;
 
     private static class Admin {
-        private static String pw = "admin123";
+        private static final String pw = "admin123";
 
         public static String getPWD() {
             return pw;
