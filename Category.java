@@ -7,10 +7,16 @@ public class Category {
     private final String category;
     private final List<Product> productList;
 
+
     public Category(String categoryName) {
         this.productList = new ArrayList<>();
         this.category = categoryName;
     }
+
+    public void removeProduct(Product product) {
+        productList.remove(product);
+    }
+
 
     public void addProduct(Product product) {
         productList.add(product);

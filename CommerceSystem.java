@@ -7,6 +7,15 @@ public class CommerceSystem {
     private final List<Category> categories;
     private Cart cart;
 
+    private static class Admin {
+        private static String pw = "admin123";
+
+        public static String getPWD() {
+            return pw;
+        }
+    }
+
+
     public CommerceSystem(List<Category> categories) {
         this.categories = categories;
     }
@@ -34,17 +43,18 @@ public class CommerceSystem {
             System.out.println("[ 실시간 커머스 플랫폼 메인 ]");
             String choice;
             Integer indexNum;
+            // 카테고리 출력
+            printCategories();
+            // 관리자 모드
+            System.out.println( categories.size()+3 + ". 관리자 모드");
 
-            for (int i = 0; i < categories.size(); i++) {
-                System.out.println( (i + 1)  + "." + categories.get(i) );
-            }
             System.out.println("0. 종료      | 프로그램 종료");
 
-            // 고객 장바구니가 비어있지 않을 경우
+            // 고객 장바구니가 비어있지 않을 경우 장바구니 출력
             if (!isCartNull(cart)) {
                 System.out.println();
                 System.out.println("[ 주문 관리 ]");
-                System.out.println(categories.size()+1 + ". 장바구니 확인    | 장바구니를 확인 후 주문합니다.");
+                System.out.println( categories.size()+1 + ". 장바구니 확인    | 장바구니를 확인 후 주문합니다.");
                 System.out.println( (categories.size()+2) + ". 주문 취소       | 진행중인 주문을 취소합니다."  );
 
             }
@@ -62,6 +72,15 @@ public class CommerceSystem {
 
             indexNum = Integer.parseInt(choice) -1;
 
+            // 관리자 모드일 경우
+            if ((indexNum + 1) == (categories.size() + 3)) {
+                if (isAdmin(sc)) {
+                    startAdminMode(sc);
+                }
+                //  패스워드 3회 실패시 처음으로 돌아감
+                continue;
+            }
+
             // 장바구니 관리일 경우
             if ((indexNum ) == categories.size() && !isCartNull(cart) ) {
                 System.out.println("아래와 같이 주문 하시겠습니까?");
@@ -76,6 +95,7 @@ public class CommerceSystem {
                 System.out.println(cart.totalPrice() + "원");
                 System.out.println();
                 System.out.println("1. 주문 확정      2. 메인으로 돌아가기");
+
                 choice = sc.nextLine();
                 if (isNotNum(choice)) {
                     continue;
@@ -105,23 +125,9 @@ public class CommerceSystem {
                 continue;
             }
 
-
-            // 없는 인덱스 범위라면
-            if (isNotIndexBound(indexNum, categories)) {
-                continue;
-            }
-
-//           // 입력한 인덱스의 카테고리 객체를 추출
-            Category selectedCategory = categories.get(indexNum);
-
-            // 입력받은 인덱스의 카테고리 이름과 해당 카테고리가 가지고 있는 상품들 추출
-            System.out.println(selectedCategory.getCategory() + " 카테고리");
-            List<Product> categoryProducts = selectedCategory.getProductList();
-
-            for (int i = 0; i < categoryProducts.size(); i++) {
-                System.out.println( (i+1) + ". " + categoryProducts.get(i));
-            }
-
+            // 입력 받은 카테고리가 있는지 없는지 확인 후 있을 경우 상품 리스트 출력
+            List<Product> categoryProducts = getProducts(indexNum);
+            if (categoryProducts == null) continue;
             System.out.println("0. 뒤로가기");
             choice = sc.nextLine();
 
@@ -161,6 +167,225 @@ public class CommerceSystem {
 
 
         }
+    }
+
+    // 카테고리 인덱스에 있는 상품인지 확인
+    private List<Product> getProducts(Integer indexNum) {
+        // 없는 인덱스 범위라면
+        if (isNotIndexBound(indexNum, categories)) {
+            return null;
+        }
+
+//           // 입력한 인덱스의 카테고리 객체를 추출
+        Category selectedCategory = categories.get(indexNum);
+
+        // 입력받은 인덱스의 카테고리 이름과 해당 카테고리가 가지고 있는 상품들 추출
+        System.out.println(selectedCategory.getCategory() + " 카테고리");
+        List<Product> categoryProducts = selectedCategory.getProductList();
+
+        for (int i = 0; i < categoryProducts.size(); i++) {
+            System.out.println( (i+1) + ". " + categoryProducts.get(i));
+        }
+        return categoryProducts;
+    }
+
+
+
+    private void printCategories() {
+        for (int i = 0; i < categories.size(); i++) {
+            System.out.println( (i + 1)  + "." + categories.get(i) );
+        }
+    }
+
+
+
+    // 관리자 모드 시작
+    private void startAdminMode(Scanner sc) {
+        while (true) {
+            System.out.println("[ 관리자 모드 ]");
+            System.out.println("1. 상품 추가\n" +
+                    "2. 상품 수정\n" +
+                    "3. 상품 삭제\n" +
+                    "4. 전체 상품 현황\n" +
+                    "0. 메인으로 돌아가기");
+
+            String choice = sc.nextLine();
+
+            switch (choice) {
+                case "1" -> {
+                    System.out.println("어느 카테고리에 상품을 추가하시겠습니까?");
+                    for (int i = 0; i < categories.size(); i++) {
+                        System.out.println( (i + 1)  + "." + categories.get(i) );
+                    }
+                    choice = sc.nextLine();
+
+                    if (isNotNum(choice)) {
+                        continue;
+                    }
+
+                    Integer indexNum = Integer.parseInt(choice);
+
+                    if (isNotIndexBound(indexNum, categories)) {
+                        continue;
+                    }
+
+                    Category category = categories.get(indexNum);
+                    System.out.println("[ 전자제품 카테고리에 상품 추가 ]");
+
+                    System.out.print("상품명을 입력해주세요:");
+                    String name = sc.nextLine();
+                    System.out.print("가격을 입력해주세요:");
+                    Integer price = sc.nextInt();
+                    sc.nextLine();
+                    System.out.print("상품 설명을 입력해주세요:");
+                    String comment = sc.nextLine();
+                    System.out.print("재고수량을 입력해주세요:");
+                    Integer stock = sc.nextInt();
+                    sc.nextLine();
+
+                    Product newProduct = new Product(name, price, comment, stock);
+                    System.out.println(newProduct + " | " + "재고: " + newProduct.getProductStock() + " 개");
+
+                    System.out.println("위 정보로 상품을 추가하시겠습니까?\n1. 확인    2. 취소");
+
+                    choice = sc.nextLine();
+                    if (choice.equals("1")) {
+                        Product[] products = {newProduct};
+                        addProduct(category, products);
+                        System.out.println("상품이 성공적으로 추가되었습니다!");
+                        continue;
+                    }
+                }
+
+                case "2" -> {
+                    System.out.print("수정할 상품명을 입력해주세요:");
+                    String name = sc.nextLine();
+
+                    for (Category category : categories) {
+                        Product product = category.getProduct(name);
+                        if (product != null) {
+                            System.out.println("현재 상품 정보: " + product + " | " + "재고: " + product.getProductStock() );
+                            System.out.println("수정할 항목을 선택해주세요:\n" +
+                                    "1. 가격\n" +
+                                    "2. 설명  \n" +
+                                    "3. 재고수량");
+
+                            choice = sc.nextLine();
+
+                            switch (choice) {
+                                case "1" -> {
+                                    Integer previousPrice = product.getProductPrice();
+                                    System.out.println("현재 가격:" + previousPrice);
+                                    System.out.print("새로운 가격을 입력해주세요:");
+                                    Integer price = sc.nextInt();
+                                    sc.nextLine();
+
+                                    product.setProductPrice(price);
+                                    System.out.println(product.getProductName() + "의 가격이 " + previousPrice + "원 -> " + price + "원으로 수정되었습니다.");
+                                }
+                                case "2" -> {
+                                    System.out.println("현재 상품의 설명 :" + product.getProductComment());
+                                    System.out.print("수정 할 상품의 설명을 입력하세요: ");
+                                    String comment = sc.nextLine();
+                                    product.setProductComment(comment);
+                                    System.out.println(product.getProductName() + "의 상품 설명이 " + comment + "로 수정 되었습니다");
+                                }
+                                case "3" -> {
+                                    System.out.println("현재 재고수량");
+                                    Integer previousStock = product.getProductStock();
+                                    System.out.println("현재 재고:" + previousStock);
+                                    System.out.print("새로운 재고수량을 입력해주세요:");
+                                    Integer stock = sc.nextInt();
+                                    product.setProductStock(stock);
+                                    System.out.println(product.getProductName() + "의 재고수량이 " + previousStock + "개 -> " + stock + "개 로 수정되었습니다.");
+                                }
+                            }
+
+                        }
+
+                    }
+                }
+
+                case "3" -> {
+                    System.out.print("삭제 할 상품명을 입력해주세요: ");
+                    String name = sc.nextLine();
+                    for (Category category : categories) {
+                        Product product = category.getProduct(name);
+                        if (product != null) {
+                            System.out.println("상품 삭제 완료");
+                            System.out.println("삭제 된 상품 정보: " + product + " | " + "재고: " + product.getProductStock() );
+                            category.removeProduct(product);
+                        }
+                    }
+
+
+                }
+
+                case "4" -> {
+                    printCategories();
+
+                    choice = sc.nextLine();
+
+                    if (isNotNum(choice)) {
+                        continue;
+                    }
+
+                    Integer indexNum = Integer.parseInt(choice) -1;
+
+
+                    List<Product> categoryProducts = getProducts(indexNum);
+                    if (categoryProducts == null) continue;
+
+                    choice = sc.nextLine();
+
+                    if (isNotNum(choice)) {
+                        continue;
+                    }
+                    // 0 입력시 처음 부분으로 복귀
+                    if (choice.equals("0")) {
+                        continue;
+                    }
+
+                    indexNum = Integer.parseInt(choice) -1;
+                    // 없는 상품 인덱스라면
+                    if (isNotProductIndexBound(indexNum, categoryProducts)) {
+                        continue;
+                    }
+
+                    Product categoryProduct = categoryProducts.get(indexNum);
+                    System.out.println("선택한 상품: " + categoryProduct + " | " + "재고: " + categoryProduct.getProductStock() + "개");
+
+                }
+
+
+                case "0" -> {
+                    return;
+                }
+            }
+
+        }
+
+
+
+
+
+    }
+
+    // 패스워드 체크
+    private boolean isAdmin(Scanner sc) {
+        String password;
+        System.out.println("관리자 비밀번호를 입력해주세요: ");
+
+        for (int i = 1; i <= 3; i++) {
+            password = sc.nextLine();
+            if (Admin.getPWD().equals(password)) {
+                return true;
+            }
+            System.out.println("패스워드 " + i +"번 실패");
+        }
+
+        return false;
+
     }
 
     private void startOrder(List<Product> cartProducts) {

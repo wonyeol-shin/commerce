@@ -1,15 +1,27 @@
 package commerce;
 
 public class Product {
-   private final String productName;
-   private final Integer productPrice;
-   private final String productComment;
+   private  String productName;
+   private  Integer productPrice;
+   private  String productComment;
    private Integer productStock;
 
     public Product(String productName, Integer productPrice, String productComment, Integer productStock) {
         this.productName = productName;
         this.productPrice = productPrice;
         this.productComment = productComment;
+        this.productStock = productStock;
+    }
+
+    public void setProductPrice(Integer productPrice) {
+        this.productPrice = productPrice;
+    }
+
+    public void setProductComment(String productComment) {
+        this.productComment = productComment;
+    }
+
+    public void setProductStock(Integer productStock) {
         this.productStock = productStock;
     }
 
